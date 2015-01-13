@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="css/nv.d3.css" rel="stylesheet" type="text/css">
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+
+
+
+
+</style>
+<body>
+
+  <div class="row">
+    <div id="chart1" class='col-md-12 ' >
+      <svg style="width:100%; height:550px" ></svg>
+    </div>
+  </div>
+  <div class="row">
+    <div id="chart2" class='col-md-12'>
+      <svg style="width:100%; height:550px"></svg>
+    </div>
+  </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="./js/lib/d3.v3.js"></script>
+<script src="./js/nv.d3.js"></script>
+<script src="./js/src/tooltip.js"></script>
+<script src="./js/src/utils.js"></script>
+<script src="./js/src/models/legend.js"></script>
+<script src="./js/src/models/axis.js"></script>
+<script src="./js/src/models/multiBar.js"></script>
+<script src="./js/src/models/multiBarChart.js"></script>
+<script src="./js/stream_layer.js"></script>
+<script>
+
+$(document).ready(function() {
+    "use strict";
+
+    var streamsSlide = [];
+    var dataArray = [];
+
+
+    $.ajax({
+
+            type: 'GET',
+            contentType: 'application/json',
+            url: '/alldata',           
+            success: function(data) {
+                
+                console.log(data);
+                for(var index=0; index < data.length ; index++){
+                  streamsSlide[index] = [];
+                  dataArray[index] = [];
+                  for(var ind=0; ind < data[index].length ; ind++){
+
+                    streamsSlide[index].push(data[index][ind].cause);
+                    dataArray[index].push(data[index][ind].num);
+
+                  };
+                  console.log(streamsSlide);
+                  console.log(dataArray);
+                };
+
+
+            
+
+
+
+
+
+            var streamsSlide0 = ['d1', 'd2', 'd3', 'd4', 'd5','d6','d7', 'd8', 'd9', 'd10'];
+
+            var year = [1990, 2010];
+
+            var dataFactory1 = function(seriesNum, perSeries, streams) {
+                    return new d3.range(0, seriesNum).map(function(d, i) {
+                        return {
+                            key: streams[i],
+                            values: new d3.range(0, perSeries).map(function(f, j) {
+                                return {
+                                    y: dataArray[0][i],
+                                    x: year[0]
+                                }
+                            })
+                        };
+                    });
+
+                }
+
+
+                var dataFactory2 = function(seriesNum, perSeries, streams) {
+                    return new d3.range(0, seriesNum).map(function(d, i) {
+                        return {
+                            key: streams[i],
+                            values: new d3.range(0, perSeries).map(function(f, j) {
+                                return {
+                                    y: dataArray[1][i],
+                                    x: year[1]
+                                }
+                            })
+                        };
+                    });
+
+                }
+
+
+                /*var dataFactory = function(seriesNum, perSeries, streams) {
+                    return new d3.range(0, seriesNum).map(function(d, i) {
+                        return {
+                            key: streams[i],
+                            values: new d3.range(0, perSeries).map(function(f, j) {
+                                return {
+                                    y: dataArray[j][i],
+                                    x: year[j]
+                                }
+                            })
+                        };
+                    });
+
+                }*/
+
+
+            drawChart('#chart1', dataFactory1(10, 1,streamsSlide[0] ) );
+            //drawChart('#chart1', dataFactory(10, 2,streamsSlide[0] ) );
+
+
+            drawChart('#chart2', dataFactory2(10, 1,streamsSlide[1] ) );
+
+            function drawChart(id, dataFactory){
+
+
+              var chart;
+              nv.addGraph(function() {
+                  chart = nv.models.multiBarChart()
+                    .barColor(d3.scale.category20().range())
+                    .margin({bottom: 100})
+                    .transitionDuration(1000)
+                    .delay(2000)
+                    .groupSpacing(0.1)
+                    ;
+
+                  chart.multibar
+                    .hideable(true);
+
+                  chart.reduceXTicks(false).staggerLabels(true);
+
+                  chart.xAxis
+                      
+                      
+                      .tickFormat(d3.format('0f'));
+
+                  //chart.showYAxis(false);
+                  chart.showLegend(false);
+
+                  chart.yAxis
+                      .tickFormat(d3.format(',.2f'));
+
+                  d3.select(id+' svg')
+                      .datum(dataFactory)
+                     .call(chart);
+
+                  nv.utils.windowResize(chart.update);
+
+                  return chart;
+              });
+
+            }
+
+          },
+
+            error: function (error) {
+              alert('error');
+            }
+      
+        }); 
+
+
+
+
+
+
+
+
+
+});
+
+
+
+</script>
