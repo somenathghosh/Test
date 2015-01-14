@@ -14,24 +14,74 @@ text {
   font: 12px sans-serif;
 }
 
-
+.leftcolumn, .rightcolumn {
+    border: 1px solid white;
+    float: left;
+    min-height: 450px;
+    
+}
 
 
 
 </style>
-<body>
+<body style="width:100%;">
 
-  <div class="row">
-    <div id="chart1" class='col-md-12 ' >
-      <svg style="width:100%; height:550px" ></svg>
-    </div>
-  </div>
-  <div class="row">
-    <div id="chart2" class='col-md-12'>
-      <svg style="width:100%; height:550px"></svg>
-    </div>
-  </div>
 
+    <div id="chart1" class="leftcolumn">
+      <svg style="width:700px; height:650px" ></svg>
+    </div>
+
+
+    <div id="chart2" class="rightcolumn">
+      <svg style="width:700px; height:650px"></svg>
+    </div>
+    <br/>
+    <form id="form">
+    <div id="checkboxes" class="col-md-12">
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox1" value="all" checked> All Years
+      </label>
+
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox2" value="Under 5 years" > Under 5 years
+      </label>
+
+
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox3" value="5-9 years" > 5-9 years
+      </label>
+
+
+
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox4" value="10-19 years" > 10-19 years
+      </label>
+
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox5" value="20-34 years" > 20-34 years
+      </label>
+
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox6" value="35-49 years" > 35-49 years
+      </label>
+      
+
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox7" value="50-59 years" > 50-59 years
+      </label>
+
+      <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox8" value="60-79 years" > 60-79 years
+      </label>
+
+      <!-- <label class="checkbox-inline">
+        <input type="checkbox" id="inlineCheckbox9" value="80+ years" > 80+ years
+      </label> -->
+
+
+      
+    </div>
+    </form>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="./js/lib/d3.v3.js"></script>
 <script src="./js/nv.d3.js"></script>
@@ -58,7 +108,6 @@ $(document).ready(function() {
             url: '/alldata',           
             success: function(data) {
                 
-                console.log(data);
                 for(var index=0; index < data.length ; index++){
                   streamsSlide[index] = [];
                   dataArray[index] = [];
@@ -68,18 +117,15 @@ $(document).ready(function() {
                     dataArray[index].push(data[index][ind].num);
 
                   };
-                  console.log(streamsSlide);
-                  console.log(dataArray);
+
                 };
 
 
-            
+
+            var colorSlide0 = ['#DF0101', '#FFBF00', '#F7FE2E', '#C8FE2E', '#00FF00','#00FFFF','#0040FF', '#8000FF', '#FF00FF', '#848484'];
+            var colorSlide1 = ['#DF0101', '#FFBF00', '#C8FE2E', '#F7FE2E', '#3104B4','#CEF6CE','#848484', '#00FFFF', '#00FF00', '#8000FF'];
 
 
-
-
-
-            var streamsSlide0 = ['d1', 'd2', 'd3', 'd4', 'd5','d6','d7', 'd8', 'd9', 'd10'];
 
             var year = [1990, 2010];
 
@@ -115,36 +161,22 @@ $(document).ready(function() {
                 }
 
 
-                /*var dataFactory = function(seriesNum, perSeries, streams) {
-                    return new d3.range(0, seriesNum).map(function(d, i) {
-                        return {
-                            key: streams[i],
-                            values: new d3.range(0, perSeries).map(function(f, j) {
-                                return {
-                                    y: dataArray[j][i],
-                                    x: year[j]
-                                }
-                            })
-                        };
-                    });
-
-                }*/
 
 
-            drawChart('#chart1', dataFactory1(10, 1,streamsSlide[0] ) );
+            drawChart('#chart1', dataFactory1(10, 1,streamsSlide[0] ), colorSlide0 );
             //drawChart('#chart1', dataFactory(10, 2,streamsSlide[0] ) );
 
 
-            drawChart('#chart2', dataFactory2(10, 1,streamsSlide[1] ) );
+            drawChart('#chart2', dataFactory2(10, 1,streamsSlide[1] ), colorSlide1 );
 
-            function drawChart(id, dataFactory){
+            function drawChart(id, dataFactory, color){
 
 
               var chart;
               nv.addGraph(function() {
                   chart = nv.models.multiBarChart()
-                    .barColor(d3.scale.category20().range())
-                    .margin({bottom: 100})
+                    
+                    .margin({bottom: 100, left: 90})
                     .transitionDuration(1000)
                     .delay(2000)
                     .groupSpacing(0.1)
@@ -152,16 +184,15 @@ $(document).ready(function() {
 
                   chart.multibar
                     .hideable(true);
-
+                  chart.color(color);
                   chart.reduceXTicks(false).staggerLabels(true);
 
                   chart.xAxis
                       
-                      
+                        
                       .tickFormat(d3.format('0f'));
-
                   //chart.showYAxis(false);
-                  chart.showLegend(false);
+                  //chart.showLegend(false);
 
                   chart.yAxis
                       .tickFormat(d3.format(',.2f'));
@@ -184,9 +215,177 @@ $(document).ready(function() {
             }
       
         }); 
+        
 
 
 
+       /* $.ajax({
+
+            type: 'GET',
+            contentType: 'application/json',
+            url: '/age_range',           
+            success: function(data) {
+              //var str = new String();
+              data.forEach(function(element, index){
+                var str = '<label class="checkbox-inline"><input type="checkbox" id="inlineCheckbox"'+index+'value='+element.AGE_RANGE+'>' + element.AGE_RANGE+'</label>'
+
+                $('#checkboxes').append(str);
+
+              });
+
+
+            },
+
+            error: function (error) {
+              alert('error');
+            }
+      
+        }); */
+
+
+
+        $('input[type=checkbox]').on('change', function() {
+          var clickedBox = this;
+          //console.log(this);
+          for (var i = 0; i < document.getElementsByTagName("input").length; i++) {
+              if (document.getElementsByTagName("input")[i].type == "checkbox" && clickedBox != document.getElementsByTagName("input")[i]) {
+                  //console.log(document.getElementsByTagName("input")[i]);
+                  document.getElementsByTagName("input")[i].checked = false;
+              }
+          }
+          if (this.checked) {
+            console.log(this.value);
+            var data = {};
+            data.age_range = this.value;
+            $.ajax({
+
+                type: 'POST',
+                contentType: 'application/json',
+                data:JSON.stringify(data),
+                url: '/getData',           
+                success: function(data) {
+                    
+                    console.log(data);
+
+                    var streamsSlide = [];
+                    var dataArray = [];
+
+
+                    for(var index=0; index < data.length ; index++){
+                  streamsSlide[index] = [];
+                  dataArray[index] = [];
+                  for(var ind=0; ind < data[index].length ; ind++){
+
+                    streamsSlide[index].push(data[index][ind].cause);
+                    dataArray[index].push(data[index][ind].num);
+
+                  };
+
+                };
+
+
+
+            var colorSlide0 = ['#DF0101', '#FFBF00', '#F7FE2E', '#C8FE2E', '#00FF00','#00FFFF','#0040FF', '#8000FF', '#FF00FF', '#848484'];
+            var colorSlide1 = ['#DF0101', '#FFBF00', '#C8FE2E', '#F7FE2E', '#3104B4','#CEF6CE','#848484', '#00FFFF', '#00FF00', '#8000FF'];
+
+
+
+            var year = [1990, 2010];
+
+            var dataFactory1 = function(seriesNum, perSeries, streams) {
+                    return new d3.range(0, seriesNum).map(function(d, i) {
+                        return {
+                            key: streams[i],
+                            values: new d3.range(0, perSeries).map(function(f, j) {
+                                return {
+                                    y: dataArray[0][i],
+                                    x: year[0]
+                                }
+                            })
+                        };
+                    });
+
+                }
+
+
+                var dataFactory2 = function(seriesNum, perSeries, streams) {
+                    return new d3.range(0, seriesNum).map(function(d, i) {
+                        return {
+                            key: streams[i],
+                            values: new d3.range(0, perSeries).map(function(f, j) {
+                                return {
+                                    y: dataArray[1][i],
+                                    x: year[1]
+                                }
+                            })
+                        };
+                    });
+
+                }
+
+
+
+
+            drawChart('#chart1', dataFactory1(10, 1,streamsSlide[0] ), colorSlide0 );
+            //drawChart('#chart1', dataFactory(10, 2,streamsSlide[0] ) );
+
+
+            drawChart('#chart2', dataFactory2(10, 1,streamsSlide[1] ), colorSlide1 );
+
+            function drawChart(id, dataFactory, color){
+
+
+              var chart;
+              nv.addGraph(function() {
+                  chart = nv.models.multiBarChart()
+                    
+                    .margin({bottom: 100, left: 90})
+                    .transitionDuration(1000)
+                    .delay(2000)
+                    .groupSpacing(0.1)
+                    ;
+
+                  chart.multibar
+                    .hideable(true);
+                  chart.color(color);
+                  chart.reduceXTicks(false).staggerLabels(true);
+
+                  chart.xAxis
+                      
+                        
+                      .tickFormat(d3.format('0f'));
+                  //chart.showYAxis(false);
+                  //chart.showLegend(false);
+
+                  chart.yAxis
+                      .tickFormat(d3.format(',.2f'));
+
+                  d3.select(id+' svg')
+                      .datum(dataFactory)
+                     .call(chart);
+
+                  nv.utils.windowResize(chart.update);
+
+                  return chart;
+              });
+
+            }
+
+                  
+
+
+                },
+
+                error: function (error) {
+                  alert('error');
+                }
+          
+            });
+
+          }
+
+
+        });
 
 
 

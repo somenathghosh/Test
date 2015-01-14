@@ -41,16 +41,13 @@ var box = new DB({
 var queryAgeRange = 'select distinct AGE_RANGE from new_table_3 order by AGE_RANGE';
 var queryYear = 'select distinct YEAR from new_table_3 order by YEAR';
 
-/*//var querySearch = 'select PERSON_NAME as name, MEETING_DATE as date , CONCAT( COALESCE(MEETING_DESCRIPTION,"") ," ", COALESCE(LONG_MEETING_DESCRIPTION,"")) as description from new_table  where MEETING_DESCRIPTION is  NOT NULL or LONG_MEETING_DESCRIPTION is NOT NULL order by name , date ';
-var queryTop1990 = 'select SUM(number) as num, cause, year, age_range from new_table_3  where year = 1990 and age_range = "10-19 years" group by cause order by num DESC limit 10 ;'
-*/
 
-var queryTop= ['select SUM(number) as num, cause, year, age_range from new_table_3  where year =1990  group by cause order by num DESC limit 10;','select SUM(number) as num, cause, year, age_range from new_table_3  where year =2010  group by cause order by num DESC limit 10;'];
+var queryTop= ['select SUM(number) as num, cause, year, age_range from new_table_3  where year =1990  and measure <> "daly" group by cause order by num DESC limit 10;','select SUM(number) as num, cause, year, age_range from new_table_3  where year =2010 and measure <> "daly" group by cause order by num DESC limit 10;'];
 
 
 function queryBuilder (argument) {
     
-    var query = 'select SUM(number) as num, cause, year, age_range from new_table_3  where year ='+ argument.year +' and age_range = "'+ argument.age_range + '" group by cause order by num DESC limit ' + argument.limit;
+    var query = 'select SUM(number) as num, cause, year, age_range from new_table_3  where year ='+ argument.year +' and measure <> "daly" and age_range = "'+ argument.age_range + '" group by cause order by num DESC limit 10;' ;
 
     return query;
 }
@@ -150,6 +147,61 @@ app.get('/alldata', function(req, res){
 
 });
 
+
+
+
+app.post('/getData', function(req, res){
+
+    console.log(req.body.age_range);
+
+    box.connect(function(conn, cb) {
+    
+            var result = [];
+            
+            var i =0;
+
+            var query = req.body.age_range === 'all' ? queryTop[0] : queryBuilder({year:1990, age_range: req.body.age_range, limit:10});
+            console.log(query);
+            conn.query(query, function function_name (err, res1) {
+
+                //console.log(res);
+                result[i] = res1;
+                i++;
+                var query = req.body.age_range === 'all' ? queryTop[1] : queryBuilder({year:2010, age_range: req.body.age_range, limit:10});
+                conn.query(query, function function_name (err, res1) {
+
+                    //console.log(res);
+                    result[i] = res1;
+                    res.send(result); 
+                          
+                }); 
+                      
+            }); 
+
+
+
+        });
+    
+    //res.send();
+
+                
+
+
+});
+
+
+
+
+app.get('/age_range', function(req, res){
+    box.connect(function(conn, cb) {
+        conn.query(queryAgeRange, function function_name (err, result) {
+            res.send(result);
+        });
+
+    });
+
+
+});
 
 app.use('/users', users);
 
